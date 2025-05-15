@@ -24,8 +24,7 @@ def annotate_chain(thinking_process):
     """Annotate a reasoning chain using GPT-4o"""
     # Format prompt according to paper
     prompt = f"""Please split the following reasoning chain of an LLM into
-annotated parts using labels and the following format ["label"]...["end-section"]. A sentence should be split into multiple
-parts if it incorporates multiple behaviours indicated by the labels.
+annotated parts using labels and the following format ["label"]...["end-section"]. Give one annotation per sentence. Check for sentence endings like "." or "!" or "?" (but not ",", ";", ":"). 
 
 If a sentence contains newline characters, include them in the annotated part verbatim. There should be no characters inbetween an ["end-section"] label and the following label.
 
@@ -34,8 +33,9 @@ Available labels:
 1. deduction -> The model is performing a deduction step based on its current approach and assumptions.
 2. adding-knowledge -> The model is enriching the current approach with recalled facts.
 3. example-testing -> The model generates examples to test its current approach.
-4. uncertainty-estimation -> The model is stating its own uncertainty.
-5. backtracking -> The model decides to change its approach.
+4. backtracking -> The model abandons, retracts, or revises a prior intermediate conclusion and/or initiates an alternative line of reasoning.
+5. uncertainty-estimation -> The model is stating its own uncertainty.
+
 
 The reasoning chain to analyze:
 {thinking_process}

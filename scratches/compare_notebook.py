@@ -32,7 +32,7 @@ from src.process_reasoning_chains import process_annotated_chain, separate_sente
 from src.annotate_reasoning_chains import annotate_chain
 from src.generate_steered_traces import sample_steering_trace
 
-steering_magnitude = 15.0
+steering_magnitude = 3.0
 steered_chain, formatted_prompt = sample_steering_trace(
     nns_model,
     tokenizer,
@@ -97,13 +97,15 @@ def compare_labellings(
 
     btk_llm = [i for i, cat in zip(strs_llm, cats_llm) if cat == "backtracking"]
     btk_manual = [i for i, cat in zip(strs_manual, cats_manual) if cat == "backtracking"]
-    btk_manual = [btk_manual[i].strip() for i in range(len(btk_manual)) if i < len(btk_llm)]
+    btk_llm = [btk_llm[i].strip() for i in range(len(btk_llm))]
+    btk_manual = [btk_manual[i].strip() for i in range(len(btk_manual))]
 
     # systematically compare the backtracking sentences
     # Find strings in btk_llm but not in btk_manual
-    only_in_llm = [s for s in btk_llm if s not in btk_manual]
+    is_sub_element = lambda s, set: or(any(s in sub for sub in set), any(sub in s for sub in set))
+    only_in_llm = [s for s in btk_llm if not is_sub_element(s, btk_manual)]
     # Find strings in btk_manual but not in btk_llm
-    only_in_manual = [s for s in btk_manual if s not in btk_llm]
+    only_in_manual = [s for s in btk_manual if not is_sub_element(s, btk_llm)]
     
     print(f"Number of backtracking sentences only in LLM annotation: {len(only_in_llm)}/{len(btk_llm)}")
     print(f"Number of backtracking sentences only in manual annotation: {len(only_in_manual)}/{len(btk_manual)}")
