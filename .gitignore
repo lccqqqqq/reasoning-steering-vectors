@@ -40,4 +40,8 @@ Thumbs.db
 
 # Local development
 .env
-.env.local 
+.env.local
+
+.venv-backups/
+onstart.sh
+ports.log

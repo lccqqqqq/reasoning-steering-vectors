@@ -1,5 +1,3 @@
-# This serves to classify sentences by observing the keywords in the sentences
-# %%
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'  # Set CUDA launch blocking for better error messages
 os.chdir(os.path.join(os.path.dirname(__file__), ".."))
@@ -26,15 +24,8 @@ from tqdm import tqdm
 import json
 # from datasets import load_dataset
 import torch.nn.functional as F
-from src.annotate_reasoning_chains import load_reasoning_chains
 
-# %%
-# Constants
-TASK_DIR = os.path.join(
-    os.path.dirname(__file__), "..", "data", "tasks"
-)
-ANNOTATED_DATASET_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "annotated_chains")
-DATASET_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "reasoning_chains")
+
 VOCAB_SENTENCE_ENDINGS = [
     ".", "!", "?", ".\n", ".\n\n", ". ", "? ", "! ", ".\n ", ".\n\n "
 ]
@@ -53,6 +44,7 @@ COLOR_DICT = {
 }
 
 
+
 def convert_to_base_tokens(tokens: t.Tensor):
     """
     Convert r1 tokens to base tokens. Only works for Llama tokenizers.
@@ -65,7 +57,6 @@ def convert_to_base_tokens(tokens: t.Tensor):
     tokens[tokens == 128013] = patch_token
     tokens[tokens == 128014] = patch_token
     return tokens
-
 
 def separate_sentences(
     trace: str,
@@ -97,7 +88,20 @@ def separate_sentences(
     sentence_break_inds = []
     for i, token in enumerate(msg_tokens):
         if any(ending in tokenizer.decode(token) for ending in vocab_sentence_endings):
-            sentence_break_inds.append(i)
+            # Manually ruling out the case where "." is actually a decimal point, like in "1.414"
+            is_decimal = False
+            try:
+                number_str = tokenizer.decode(
+                    [msg_tokens[i-1], msg_tokens[i], msg_tokens[i+1]],
+                )
+                strs = number_str.split(".")
+                if strs[0][-1].isdigit() and strs[1][0].isdigit():
+                    is_decimal = True
+            except:
+                pass
+        
+            if not is_decimal:
+                sentence_break_inds.append(i)
         
     # To deal with bullet points, need to filter out the sentences with length <= 3
     filtered_sentence_break_inds = [0]
@@ -106,13 +110,13 @@ def separate_sentences(
         if i == 0:
             continue
         
-        sentence_length = ind - active_sentence_start
-        # print(sentence_length)
-        if sentence_length <= 3:
-            continue
-        else:
-            filtered_sentence_break_inds.append(ind)
-            active_sentence_start = ind
+        # sentence_length = ind - active_sentence_start
+        # # print(sentence_length)
+        # if sentence_length <= 3:
+        #     continue
+        # else:
+        filtered_sentence_break_inds.append(ind)
+        active_sentence_start = ind
             
     
     # Now break the message into sentences
@@ -216,34 +220,11 @@ def classify_sentences(
 
     return cats
 
-# %% Testing
 
-# load the available reasoning chains
-# as a list of dicts
-reasoning_chains = load_reasoning_chains(os.path.join(DATASET_DIR, "all_reasoning_chains.json"))
-annotated_chains = load_reasoning_chains(os.path.join(ANNOTATED_DATASET_DIR, "all_annotated_chains.json"))
-test_chain = reasoning_chains[0]['reasoning_chain']
-annotated_test_chain = annotated_chains[0]['annotated_chain']
-print(test_chain)
-print(annotated_test_chain)
-
-# %% 
-tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B")
-sentence_strs, sentence_tokens, filtered_sentence_break_inds = separate_sentences(test_chain, tokenizer)
-
-cats_manual = classify_sentences(sentence_strs, sentence_tokens, reasoning_vocab=REASONING_VOCAB, return_dict=False, print_msg=True)
-
-# %%
-
-text_chunks = annotated_test_chain.split('["end-section"]')
-text = text_chunks[0]
-text_cat, text_str = text.split(']')
-text_cat = text_cat.strip('["').strip('"')
-
-# %%
-
-def process_annotated_chain(annotated_chain):
+def process_annotated_chain(annotated_chain: str):
     """Process the annotated chains to get the sentence strings and the corresponding categories
+    
+    Note that this is from the LLM judge's perspective.
     
     Args:
         annotated_chain (str): The annotated chain to process
@@ -266,36 +247,3 @@ def process_annotated_chain(annotated_chain):
             print(f"Error splitting chunk: {chunk}")
             raise Exception("Error splitting chunk")
     return strs, cats
-
-# %%
-strs, cats = process_annotated_chain(annotated_test_chain)
-print(strs)
-print(cats)
-
-# %%
-# asserting that the sentence is split correctly
-
-# assert len(strs) == len(sentence_strs)
-# The sentence strings are unequal
-clean_strs = [s.strip('\n') for s in sentence_strs]
-for i, (s1, s2) in enumerate(zip(strs, clean_strs)):
-    if s1 != s2:
-        print(f"Error at index {i}")
-        print(f"Manual split: {s2}")
-        print(f"LLM judge: {s1}")
-        break
-
-# now need to compare the backtracking categories... list all the backtracking sentences from both LLM judge and the manual split. Compare these
-
-backtracking_strs_llm = [s for s, c in zip(strs, cats) if c == "backtracking"]
-backtracking_strs_manual = [s for s, c in zip(clean_strs, cats_manual) if c == "backtracking"]
-
-# %%
-print(backtracking_strs_llm)
-print(backtracking_strs_manual)
-
-# %%
-
-
-
-
