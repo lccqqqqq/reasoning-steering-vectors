@@ -10,7 +10,7 @@ REASONING_CHAINS_DIR = "new_reasoning_chains"
 ANNOTATED_CHAINS_DIR = "new_annotated_chains"
 
 # Create output directory
-os.makedirs(ANNOTATED_CHAINS_DIR, exist_ok=True)
+# os.makedirs(ANNOTATED_CHAINS_DIR, exist_ok=True)
 
 # Initialize OpenAI client
 client = OpenAI()

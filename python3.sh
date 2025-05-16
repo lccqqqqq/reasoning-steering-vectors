@@ -1,6 +1,6 @@
 #!/bin/bash -l
 echo =========================================================   
-echo Job submitted  date = Thu 15 May 17:11:30 BST 2025      
+echo Job submitted  date = Fri 16 May 16:45:37 BST 2025      
 date_start=`date +%s`
 echo $SLURM_JOB_NUM_NODES nodes \( $SLURM_CPUS_ON_NODE processes per node \)        
 echo $SLURM_JOB_NUM_NODES hosts used: $SLURM_JOB_NODELIST      
@@ -15,7 +15,7 @@ echo
 ulimit -l unlimited
 
 export OMP_NUM_THREADS=8
- nice -n 10 /usr/bin/python3 -u experiments/compare_llm_and_manual_labelling.py
+ nice -n 10 /usr/bin/python3 -u src/generate_steered_traces.py
   echo ---------------                                           
   echo Job output ends                                           
 

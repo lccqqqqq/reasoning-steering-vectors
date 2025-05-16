@@ -13,8 +13,21 @@ import pickle
 import itertools
 from tqdm import tqdm
 
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import dotenv
+
+dotenv.load_dotenv()
+print("Starting directory:", os.getcwd())
+os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+print("Changed to directory:", os.getcwd())
+import dotenv
+dotenv.load_dotenv()
+
 # from run_experiment import load_random_prompts
 # from generate_steering_vectors import convert_to_base_tokens
+from annotate_reasoning_chains import annotate_chain
 
 def load_random_prompts(file_path, num_prompts):
     with open(file_path, "r") as f:
@@ -49,6 +62,105 @@ os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 STEERING_VECTORS_DIR = "data/steering_vectors"
 base_steering_vectors = t.load(os.path.join(STEERING_VECTORS_DIR, "base_steering_vectors.pt"))
 finetune_steering_vectors = t.load(os.path.join(STEERING_VECTORS_DIR, "ft_steering_vectors.pt"))
+
+
+
+def generate_steered_trace_with_annotation(
+    model: LanguageModel,          # Expect to be a fine-tuned model
+    tokenizer: AutoTokenizer,      # Expect to be the tokenizer for the fine-tuned model
+    file_path: str, 
+    steering_vector: t.Tensor,
+    steering_layer: int,
+    steering_magnitude: float,
+    max_new_tokens: int = 300,
+    annotation: bool = True,
+    save_to_path: str = None,
+) -> None:
+    """
+    Generate steered traces from a file with annotations
+    
+    Output in a saved json file with the following format:
+    
+    - metadata:
+        - model_type: str
+        - steering_category: str
+        - steering_layer: int
+        - steering_magnitude: float
+    - traces:
+        - prompt: str
+        - steered_trace: str
+        - annotation: str
+    """
+    prompt_list = json.load(open(file_path))
+    total_skipped = 0
+    traces = pd.DataFrame(columns=["prompt", "steered_chain", "annotated_chain"])
+    for prompt_item in tqdm(prompt_list):
+        # Create a new row as a dictionary and append it to the DataFrame
+        if annotation:
+            new_row = {
+                "prompt": prompt_item["problem"],
+                "steered_chain": None,
+                "annotated_chain": None
+            }
+        else:
+            new_row = {
+                "prompt": prompt_item["problem"],
+                "steered_chain": None,
+            }
+        
+        # format the prompt for the model simulation
+        formatted_prompt = tokenizer.apply_chat_template(
+            [{"role": "user", "content": prompt_item["problem"]}],
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+        
+        with t.no_grad():
+            with model.generate(formatted_prompt, max_new_tokens=max_new_tokens) as tracer:
+                activation = model.model.layers[steering_layer].output[0]
+                activation[:] += steering_magnitude * steering_vector.to(activation.device)
+                
+                steered_rollout = model.generator.output.save()
+            
+            steered_chain = tokenizer.decode(steered_rollout[0], skip_special_tokens=True) # NOTE: this includes the generation prompt... so ideally we should remove it, not a big deal I think...
+        
+        new_row["steered_chain"] = steered_chain
+        
+        if annotation:
+            annotated_chain = annotate_chain(steered_chain)
+            if annotated_chain is not None:
+                new_row["annotated_chain"] = annotated_chain
+            else:
+                print(f"Error during annotation: task {prompt_item['task_id']}, skipping...")
+                total_skipped += 1
+                continue
+        
+        traces = pd.concat([traces, pd.DataFrame([new_row])], ignore_index=True)
+    
+    if save_to_path is not None:
+        # Create directory if it doesn't exist
+        # os.makedirs(os.path.dirname(save_to_path), exist_ok=True)
+        
+        # Format the data for saving
+        save_data = {
+            "metadata": {
+                "steering_layer": steering_layer,
+                "steering_magnitude": steering_magnitude,
+                "max_new_tokens": max_new_tokens,
+                "total_skipped": total_skipped
+            },
+            "traces": traces.to_dict(orient="records")
+        }
+        
+        # Save to JSON file
+        with open(save_to_path, 'w') as f:
+            json.dump(save_data, f, indent=4)
+        
+        print(f"Saved traces to {save_to_path}")
+    
+    return traces
+    
+        
 
 def generate_steered_traces(
     model: LanguageModel,
@@ -242,16 +354,44 @@ def sample_steering_trace(
 
 
 if __name__ == "__main__":
-    prompts = load_random_prompts("data/annotated_chains/all_annotated_chains.json", 12)
-    traces = collect_traces_all_categories(
-        model=base_model,
-        base_tokenizer=base_tokenizer,
-        finetune_tokenizer=finetune_tokenizer,
-        model_type="base",
-        prompts=prompts,
-        steering_vectors=base_steering_vectors,
-        save_dir="steered_rollouts_large_magnitude",
+    os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+    filename = "probability_annotated_chains.json"
+    file_path = "data/annotated_chains/" + filename
+    steering_layer = 10
+    steering_magnitude = 4.0
+    steering_vector = base_steering_vectors["backtracking"][steering_layer]
+
+    save_to_dir = f"data/steering_results/magnitude_{int(steering_magnitude)}"
+    os.makedirs(save_to_dir, exist_ok=True)
+    save_to_path = os.path.join(save_to_dir, filename)
+    traces = generate_steered_trace_with_annotation(
+        finetune_model, finetune_tokenizer, file_path, steering_vector, steering_layer, steering_magnitude, max_new_tokens=400, annotation=True, save_to_path=save_to_path
     )
+    
+    # generate_steered_trace_with_annotation(
+    #     model: LanguageModel,          # Expect to be a fine-tuned model
+    #     tokenizer: AutoTokenizer,      # Expect to be the tokenizer for the fine-tuned model
+    #     file_path: str, 
+    #     steering_vector: t.Tensor,
+    #     steering_layer: int,
+    #     steering_magnitude: float,
+    #     max_new_tokens: int = 300,
+    #     annotation: bool = True,
+    #     save_to_path: str = None,
+    # ) -> None:
+        
+    
+    
+    # prompts = load_random_prompts("data/annotated_chains/all_annotated_chains.json", 12)
+    # traces = collect_traces_all_categories(
+    #     model=base_model,
+    #     base_tokenizer=base_tokenizer,
+    #     finetune_tokenizer=finetune_tokenizer,
+    #     model_type="base",
+    #     prompts=prompts,
+    #     steering_vectors=base_steering_vectors,
+    #     save_dir="steered_rollouts_large_magnitude",
+    # )
     # traces = generate_steered_traces(
     #     model=base_model,
     #     tokenizer=base_tokenizer,

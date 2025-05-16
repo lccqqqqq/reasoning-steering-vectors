@@ -170,3 +170,8 @@ def sweep(file_path: str, steering_magnitude_set: list[float], steering_vector: 
 
 # %%
 sweep("data/tasks/all_reasoning_tasks.json", [1.0], base_steering_vector, 10, save_dir="data/steering_results/base", steering_type="base", save_file=True, max_new_tokens=500)
+
+
+
+
+

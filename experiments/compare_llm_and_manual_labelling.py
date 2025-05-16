@@ -125,5 +125,5 @@ if __name__ == "__main__":
     base_steering_vector = t.load(os.path.join(STEERING_VECTORS_DIR, "base_steering_vectors.pt"))['backtracking']
     finetune_steering_vector = t.load(os.path.join(STEERING_VECTORS_DIR, "ft_steering_vectors.pt"))['backtracking']
 
-    sweep("data/tasks/all_reasoning_tasks.json", [0.0, 1.0, 4.0, 8.0, 10.0], base_steering_vector, 10, save_dir="data/steering_results/base", steering_type="base", save_file=True, max_new_tokens=500)
-    sweep("data/tasks/all_reasoning_tasks.json", [0.0, 1.0, 4.0, 8.0, 10.0], finetune_steering_vector, 10, save_dir="data/steering_results/finetune", steering_type="finetune", save_file=True, max_new_tokens=500)
+    # sweep("data/tasks/all_reasoning_tasks.json", [0.0, 1.0, 4.0, 8.0, 10.0], base_steering_vector, 10, save_dir="data/steering_results/base", steering_type="base", save_file=True, max_new_tokens=500)
+    sweep("data/tasks/all_reasoning_tasks.json", [1.0, 4.0, 8.0, 10.0], finetune_steering_vector, 10, save_dir="data/steering_results/finetune", steering_type="finetune", save_file=True, max_new_tokens=500)
