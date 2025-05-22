@@ -96,17 +96,23 @@ results = logit_lens_results.cpu().numpy()
 plt.figure(figsize=(10, 6))
 
 # Plot lines with same color but different opacity for same decoder
-plt.plot(results[:, 0], label='Base Steering - Base Model', color='tab:blue', alpha=0.5, marker='o', linestyle='-')
-plt.plot(results[:, 1], label='Base Steering - FT Model', color='tab:blue', alpha=1.0, marker='o', linestyle='-')
-plt.plot(results[:, 2], label='FT Steering - Base Model', color='tab:orange', alpha=0.5, marker='o', linestyle='-')
-plt.plot(results[:, 3], label='FT Steering - FT Model', color='tab:orange', alpha=1.0, marker='o', linestyle='-')
+plt.plot(results[:, 0], label='Base-derived steering vectors; Base model decoded', color='tab:blue', alpha=0.5, marker='o', linestyle='-')
+plt.plot(results[:, 1], label='Base-derived steering vectors; FT model decoded', color='tab:blue', alpha=1.0, marker='o', linestyle='-')
+plt.plot(results[:, 2], label='FT-derived steering vectors; Base model decoded', color='tab:orange', alpha=0.5, marker='o', linestyle='-')
+plt.plot(results[:, 3], label='FT-derived steering vectors; FT model decoded', color='tab:orange', alpha=1.0, marker='o', linestyle='-')
 
-plt.title('Logit Lens Results Across Layers')
-plt.xlabel('Layer')
-plt.ylabel('Logit Value')
-plt.legend()
+# plt.title('Logit Lens Results Across Layers', fontsize=14, pad=15)
+plt.xlabel('Layer', fontsize=15, labelpad=10)
+plt.ylabel('Backtracking score', fontsize=15, labelpad=10)
+plt.legend(fontsize=13)
 plt.grid(True)
-plt.show()
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+
+# Adjust layout to prevent text cutoff
+plt.tight_layout()
+
+plt.savefig("logit_lens_results.png", dpi=300, bbox_inches='tight')
 
 
 

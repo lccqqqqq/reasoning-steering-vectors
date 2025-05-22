@@ -1,0 +1,35 @@
+[
+    {
+        "TP": 90,
+        "FP": 54,
+        "FN": 45,
+        "TN": 1532,
+        "total_sentence_analyzed": 1721,
+        "skipped_instances": 8,
+        "metadata": [
+            "data/new_steering_results/magnitude_4/spatial_annotated_chains.json"
+        ]
+    },
+    {
+        "TP": 102,
+        "FP": 110,
+        "FN": 48,
+        "TN": 1574,
+        "total_sentence_analyzed": 1834,
+        "skipped_instances": 7,
+        "metadata": [
+            "data/new_steering_results/magnitude_8/spatial_annotated_chains.json"
+        ]
+    },
+    {
+        "TP": 163,
+        "FP": 179,
+        "FN": 96,
+        "TN": 1553,
+        "total_sentence_analyzed": 1991,
+        "skipped_instances": 4,
+        "metadata": [
+            "data/new_steering_results/magnitude_12/spatial_annotated_chains.json"
+        ]
+    }
+]

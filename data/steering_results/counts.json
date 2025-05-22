@@ -1,0 +1,65 @@
+[
+    {
+        "TP": 378,
+        "FP": 567,
+        "FN": 195,
+        "TN": 18154,
+        "total_sentence_analyzed": 19294,
+        "skipped_instances": 126,
+        "metadata": [
+            "data/annotated_chains/all_annotated_chains.json"
+        ]
+    },
+    {
+        "TP": 176,
+        "FP": 131,
+        "FN": 102,
+        "TN": 5080,
+        "total_sentence_analyzed": 5489,
+        "skipped_instances": 23,
+        "metadata": [
+            "data/steering_results/magnitude_4/probability_annotated_chains.json",
+            "data/steering_results/magnitude_4/spatial_annotated_chains.json",
+            "data/steering_results/magnitude_4/math_logic_annotated_steering_traces.json"
+        ]
+    },
+    {
+        "TP": 193,
+        "FP": 114,
+        "FN": 104,
+        "TN": 5043,
+        "total_sentence_analyzed": 5454,
+        "skipped_instances": 20,
+        "metadata": [
+            "data/steering_results/magnitude_8/probability_annotated_chains.json",
+            "data/steering_results/magnitude_8/math_logic_annotated_chains.json",
+            "data/steering_results/magnitude_8/spatial_annotated_chains.json"
+        ]
+    },
+    {
+        "TP": 185,
+        "FP": 107,
+        "FN": 100,
+        "TN": 4866,
+        "total_sentence_analyzed": 5258,
+        "skipped_instances": 27,
+        "metadata": [
+            "data/steering_results/magnitude_12/spatial_annotated_chains.json",
+            "data/steering_results/magnitude_12/probability_annotated_chains.json",
+            "data/steering_results/magnitude_12/math_logic_annotated_chains.json"
+        ]
+    },
+    {
+        "TP": 135,
+        "FP": 255,
+        "FN": 52,
+        "TN": 4147,
+        "total_sentence_analyzed": 4589,
+        "skipped_instances": 52,
+        "metadata": [
+            "data/steering_results/magnitude_0/probability_annotated_chains.json",
+            "data/steering_results/magnitude_0/math_logic_annotated_chains.json",
+            "data/steering_results/magnitude_0/spatial_annotated_chains.json"
+        ]
+    }
+]

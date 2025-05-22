@@ -353,20 +353,47 @@ def sample_steering_trace(
     return steered_chain, formatted_prompt
 
 
+
+    
+
+
 if __name__ == "__main__":
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
-    filename = "probability_annotated_chains.json"
-    file_path = "data/annotated_chains/" + filename
-    steering_layer = 10
-    steering_magnitude = 4.0
-    steering_vector = base_steering_vectors["backtracking"][steering_layer]
+    for steering_magnitude in [4, 8, 12]:
+        print(f"Generating steered traces for steering magnitude {steering_magnitude}...")
+        filename = [
+            "probability_annotated_chains.json",
+            # "spatial_annotated_chains.json"
+            "math_logic_annotated_chains.json"
+        ]
+        file_path = ["data/annotated_chains/" + filename[i] for i in range(len(filename))]
+        steering_layer = 10
+        # steering_magnitude = 4.0
+        
+        # Finetune sourced model
+        steering_vector = finetune_steering_vectors["backtracking"]
+        print(steering_vector.shape)
+        print("Generating steered traces for finetune sourced steering vector...")
+        save_to_dir = f"data/new_steering_results_finetune/magnitude_{int(steering_magnitude)}"
+        os.makedirs(save_to_dir, exist_ok=True)
+        for i in range(len(file_path)):
+            save_to_path = os.path.join(save_to_dir, filename[i])
+            traces = generate_steered_trace_with_annotation(
+                finetune_model, finetune_tokenizer, file_path[i], steering_vector, steering_layer, steering_magnitude, max_new_tokens=400, annotation=True, save_to_path=save_to_path
+            )
+        
+        # same thing for base sourced steering vector
+        steering_vector = base_steering_vectors["backtracking"]
+        print(steering_vector.shape)
+        print("Generating steered traces for base sourced steering vector...")
 
-    save_to_dir = f"data/steering_results/magnitude_{int(steering_magnitude)}"
-    os.makedirs(save_to_dir, exist_ok=True)
-    save_to_path = os.path.join(save_to_dir, filename)
-    traces = generate_steered_trace_with_annotation(
-        finetune_model, finetune_tokenizer, file_path, steering_vector, steering_layer, steering_magnitude, max_new_tokens=400, annotation=True, save_to_path=save_to_path
-    )
+        save_to_dir = f"data/new_steering_results/magnitude_{int(steering_magnitude)}"
+        os.makedirs(save_to_dir, exist_ok=True)
+        for i in range(len(file_path)):
+            save_to_path = os.path.join(save_to_dir, filename[i])
+            traces = generate_steered_trace_with_annotation(
+                finetune_model, finetune_tokenizer, file_path[i], steering_vector, steering_layer, steering_magnitude, max_new_tokens=400, annotation=True, save_to_path=save_to_path
+            )
     
     # generate_steered_trace_with_annotation(
     #     model: LanguageModel,          # Expect to be a fine-tuned model

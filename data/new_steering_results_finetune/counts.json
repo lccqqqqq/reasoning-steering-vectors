@@ -1,0 +1,40 @@
+[
+    {
+        "TP": 0,
+        "FP": 0,
+        "FN": 0,
+        "TN": 0,
+        "total_sentence_analyzed": 0,
+        "skipped_instances": 0,
+        "metadata": [
+            "data/new_steering_results_finetune/magnitude_4/math_logic_annotated_chains.json",
+            "data/new_steering_results_finetune/magnitude_4/probability_annotated_chains.json"
+        ]
+    },
+    {
+        "TP": 217,
+        "FP": 277,
+        "FN": 123,
+        "TN": 4861,
+        "total_sentence_analyzed": 5478,
+        "skipped_instances": 25,
+        "metadata": [
+            "data/new_steering_results_finetune/magnitude_8/probability_annotated_chains.json",
+            "data/new_steering_results_finetune/magnitude_8/spatial_annotated_chains.json",
+            "data/new_steering_results_finetune/magnitude_8/math_logic_annotated_chains.json"
+        ]
+    },
+    {
+        "TP": 490,
+        "FP": 532,
+        "FN": 353,
+        "TN": 4475,
+        "total_sentence_analyzed": 5850,
+        "skipped_instances": 13,
+        "metadata": [
+            "data/new_steering_results_finetune/magnitude_12/math_logic_annotated_chains.json",
+            "data/new_steering_results_finetune/magnitude_12/probability_annotated_chains.json",
+            "data/new_steering_results_finetune/magnitude_12/spatial_annotated_chains.json"
+        ]
+    }
+]

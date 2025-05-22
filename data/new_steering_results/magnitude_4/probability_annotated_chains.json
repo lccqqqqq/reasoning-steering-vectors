@@ -1,0 +1,9 @@
+{
+    "metadata": {
+        "steering_layer": 10,
+        "steering_magnitude": 4,
+        "max_new_tokens": 400,
+        "total_skipped": 100
+    },
+    "traces": []
+}

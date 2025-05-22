@@ -1,0 +1,40 @@
+=========================================================
+Job submitted date = Sat 17 May 00:37:58 BST 2025
+1 nodes ( 8 processes per node )
+1 hosts used: sondhigpu
+Job output begins
+-----------------
+
+Disclaimer: these are actually not steered at all...
+--------------------------------------------------
+Label: all_magnitude_0
+Precision: 40.00%
+Recall: 65.97%
+F1: 49.80%
+--------------------------------------------------
+Label: magnitude_4
+Precision: 57.33%
+Recall: 63.31%
+F1: 60.17%
+--------------------------------------------------
+Label: magnitude_8
+Precision: 62.87%
+Recall: 64.98%
+F1: 63.91%
+--------------------------------------------------
+Label: magnitude_12
+Precision: 63.36%
+Recall: 64.91%
+F1: 64.12%
+--------------------------------------------------
+Label: magnitude_0
+Precision: 34.62%
+Recall: 72.19%
+F1: 46.79%
+==================================================
+---------------
+Job output ends
+=========================================================
+PBS job: finished date = Sat 17 May 00:38:00 BST 2025
+Total run time : 0 Hours 0 Minutes 1 Seconds
+=========================================================
